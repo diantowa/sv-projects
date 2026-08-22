@@ -52,7 +52,6 @@
 
     /* Transitions */
     --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
-    --duration-fast: 150ms;
     --duration-normal: 250ms;
 }
 
@@ -156,7 +155,6 @@
 
 /* Base reset */
 html {
-    scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
@@ -256,4 +254,219 @@ a {
         color 300ms var(--ease-default) !important,
         fill 300ms var(--ease-default) !important,
         stroke 300ms var(--ease-default) !important;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   Motion — design tokens, reveal primitives, keyframe utilities
+   Rendered with transform+opacity only; all gated on
+   prefers-reduced-motion (JS and CSS sides).
+   ════════════════════════════════════════════════════════════════════ */
+
+/* Easing + duration tokens (referenced by CSS & components) */
+:root {
+    --ease-motion: cubic-bezier(0.22, 1, 0.36, 1);
+    --duration-enter: 700ms;
+    --duration-fast: 150ms;
+    --duration-normal: 250ms;
+}
+
+/* Scroll-reveal state (driven by the `reveal` action) */
+.reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition:
+        opacity var(--duration-enter) var(--ease-motion),
+        transform var(--duration-enter) var(--ease-motion);
+    will-change: opacity, transform;
+}
+.reveal.revealed {
+    opacity: 1;
+    transform: none;
+}
+
+/* Stagger-able list containers (children get inline delay from JS) */
+.reveal-stagger > * {
+    opacity: 0;
+    transform: translateY(20px);
+    transition:
+        opacity var(--duration-enter) var(--ease-motion),
+        transform var(--duration-enter) var(--ease-motion);
+}
+.reveal-stagger.revealed > * {
+    opacity: 1;
+    transform: none;
+}
+
+/* Lightweight ambient loops for hero/demo only (non-load-bearing) */
+@keyframes float-slow {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-8px);
+    }
+}
+@keyframes pulse-soft {
+    0%,
+    100% {
+        opacity: 0.5;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+/* Footer watermark: slow violet drift (reduced-motion aware) */
+@media (prefers-reduced-motion: no-preference) {
+    .footer-watermark {
+        animation: watermark-drift 24s var(--ease-motion) infinite alternate;
+        animation-delay: 1.2s;
+    }
+}
+@keyframes watermark-drift {
+    from {
+        filter: hue-rotate(0deg);
+    }
+    to {
+        filter: hue-rotate(28deg);
+    }
+}
+
+/* ── Shared entrance keyframe: fade + rise, --ease-motion ──
+   Used by the hero (.animate-in*) and by scroll-revealed sections
+   (.rise-el, driven by the reveal action in "rise" mode). One motion
+   language across the whole site. Reduced-motion: killed globally below. */
+@keyframes rise-in {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+.rise-el {
+    animation: rise-in 800ms var(--ease-motion) both;
+    animation-play-state: paused;
+}
+/* Un-pause when the reveal fires:
+   - non-stagger: the element itself carries both .rise-el and .revealed
+   - stagger: children un-pause when the parent (.reveal-stagger) reveals */
+.rise-el.revealed,
+.reveal-stagger.revealed > .rise-el,
+.reveal.revealed > .rise-el {
+    animation-play-state: running;
+}
+
+/* Above-fold entrances (hero + page headers): run once on load. */
+.animate-in {
+    animation: rise-in 800ms var(--ease-motion) both;
+    animation-delay: 150ms;
+}
+.animate-in-2 {
+    animation: rise-in 800ms var(--ease-motion) both;
+    animation-delay: 280ms;
+}
+.animate-in-3 {
+    animation: rise-in 800ms var(--ease-motion) both;
+    animation-delay: 410ms;
+}
+
+/* ── Archive: masonry feed (JS shortest-column placement, Pinterest-style) ──
+   Cards are absolutely positioned by the page's layout effect (left/top +
+   width inline); the container height is set to the tallest column. Order
+   flows horizontally: each card lands in the currently shortest column. */
+.archive-masonry {
+    position: relative;
+}
+.archive-masonry > .arch-card {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* Toolbar (search + tag dropdown) styles live in the archive page scope;
+   only the shared masonry/spinner primitives are global. */
+
+/* Infinite-scroll appended cards: rise in from a short distance. Un-pause
+   happens via `.running` added by the page once the node is attached. */
+.arch-card.rise-in {
+    animation: rise-in 700ms var(--ease-motion) both;
+    animation-play-state: paused;
+}
+.arch-card.rise-in.running {
+    animation-play-state: running;
+}
+
+/* Loader + end-of-feed states (spinner is transform-only). */
+.archive-status {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-element) 0;
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+}
+.archive-spinner {
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid var(--color-border);
+    border-top-color: var(--color-accent);
+    border-radius: 50%;
+    animation: archive-spin 800ms linear infinite;
+}
+@keyframes archive-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+/* Tag dropdown menu entrance — fade + small rise, same motion language. */
+@keyframes menu-in {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* ── Lenis smooth scroll ──
+   Required base styles: html.lenis prevents layout shift from smoothing,
+   .lenis-smooth keeps native scrollbar. */
+html.lenis,
+html.lenis body {
+    height: auto;
+}
+.lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+    overflow: hidden;
+}
+
+/* Site reduced-motion: snap reveals, kill loops/transitions */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    .reveal,
+    .reveal-stagger > * {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+    .rise-el {
+        animation-duration: 0.01ms !important;
+        animation-delay: 0ms !important;
+        animation-play-state: running !important;
+    }
 }

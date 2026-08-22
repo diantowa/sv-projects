@@ -1,5 +1,6 @@
 <script lang="ts">
     import type { BlogPost } from "$lib/types";
+    import { reveal } from "$lib/actions/reveal";
 
     interface Props {
         id?: string;
@@ -11,7 +12,7 @@
     const hasMore = $derived((posts?.length ?? 0) > 4);
 </script>
 
-<section {id} class="archive-preview" aria-label="Recent Articles">
+<section {id} class="archive-preview" aria-label="Recent Articles" use:reveal={{ mode: "rise", stagger: true, staggerInterval: 80 }}>
     <div class="archive-inner grid-container">
         <span class="label">Archive</span>
         <h2 class="section-title">Recent Writing</h2>

@@ -28,13 +28,13 @@
             <img src={avatar} alt={name} width="168" height="168" />
         </div>
 
-        <h1 class="greeting">{greeting}</h1>
+        <h1 class="greeting animate-in">{greeting}</h1>
 
-        <div class="lead">
+        <div class="lead animate-in-2">
             {#if lead}{@render lead()}{/if}
         </div>
 
-        <nav class="links" aria-label="Profile links">
+        <nav class="links animate-in-3" aria-label="Profile links">
             {#each links as link (link.label)}
                 <a
                     href={link.href}
@@ -137,4 +137,7 @@
         cursor: pointer;
         font-family: inherit;
     }
+
+    /* Entrance choreography: `.animate-in*` classes are global (rise-in
+       keyframe in global.css) so every page shares the same hero motion. */
 </style>

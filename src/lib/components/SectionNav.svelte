@@ -1,6 +1,7 @@
 <script lang="ts">
     import type { SectionItem } from "$lib/types";
     import { onMount } from "svelte";
+    import { smoothScrollTo } from "$lib/utils/scroll";
 
     interface Props {
         sections: SectionItem[];
@@ -19,51 +20,73 @@
     const GAP = 4; // 0.25rem
     const ITEM_PAD_X = 12; // 0.375rem * 2 sides (from .nav-item padding)
 
+    // Active-section zone: 30% down the viewport. The nav highlights the
+    // section whose vertical range contains this line — deterministic per
+    // pixel, no threshold gaps.
+    const ACTIVE_ZONE = 0.3;
+    let firstId = $state<string>("");
+
     $effect(() => {
-        const firstId = sections[0]?.id;
-        if (firstId && !activeId) {
-            activeId = firstId;
+        const f = sections[0]?.id;
+        if (f && !firstId) {
+            firstId = f;
+            if (!activeId) activeId = f;
         }
     });
 
-    // Detect overlap: on mobile, check if labels would exceed available width
-    $effect(() => {
-        if (!dockEl || sections.length === 0) return;
+    function updateActive() {
+        // Measure from layout (offsetTop against body) so CSS transforms from
+        // reveal transitions can't shift boundaries transiently.
+        const spy = window.scrollY + window.innerHeight * ACTIVE_ZONE;
+        let current = "";
+        for (const section of sections) {
+            const el = document.getElementById(section.id);
+            if (!el) continue;
+            const top = el.offsetTop;
+            const bottom = top + el.offsetHeight;
+            if (top <= spy && bottom > spy) {
+                current = section.id;
+                break;
+            }
+        }
+        if (current !== activeId) {
+            activeId = current || firstId; // above first section → first
+        }
+        if (pendingId && pendingId === activeId) pendingId = "";
+    }
 
+    function scrollTo(id: string) {
+        pendingId = id;
+        const el = document.getElementById(id);
+        if (el) {
+            smoothScrollTo(el);
+        }
+        // Fallback: if the spy never lands on it (e.g. same section), clear after a delay
+        setTimeout(() => {
+            if (pendingId === id) pendingId = "";
+        }, 1200);
+    }
+
+    // Wrap detection (mobile label overflow) — runs on mount/resize.
+    function updateWrap() {
+        if (!dockEl || sections.length === 0) return;
         const isMobile = window.innerWidth < 1024;
         if (!isMobile) {
             useWrap = false;
             shouldWrap = false;
             return;
         }
-
         const count = sections.length;
         const totalGap = (count - 1) * GAP;
         const totalPadding = count * ITEM_PAD_X;
         const availableTextWidth = dockWidth - totalGap - totalPadding;
         const widthPerItem = availableTextWidth / count;
         const maxChars = Math.floor(widthPerItem / CHAR_WIDTH);
-
-        // If any label exceeds maxChars AND has a wrap fallback → enable wrapping
         const needsWrap = sections.some(
             (s) => s.label.length > maxChars && s.wrap,
         );
         useWrap = needsWrap;
-
-        // If more than 6 items, enable flex-wrap
         shouldWrap = count > 7;
-    });
-
-    function scrollTo(id: string) {
-        pendingId = id;
-        const el = document.getElementById(id);
-        if (el) {
-            el.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-        // Fallback: if IntersectionObserver never fires (e.g. same section), clear after a delay
-        setTimeout(() => {
-            if (pendingId === id) pendingId = "";
-        }, 1200);
     }
 
     onMount(() => {
@@ -76,41 +99,18 @@
         if (dockEl) ro.observe(dockEl);
 
         const onResize = () => {
-            // Trigger reactivity on window resize crossing the 1024px breakpoint
             if (dockEl) dockWidth = dockEl.getBoundingClientRect().width;
+            updateActive();
+            updateWrap();
         };
         window.addEventListener("resize", onResize);
-
-        const observer = new IntersectionObserver(
-            (entries) => {
-                const visible = entries
-                    .filter((e) => e.isIntersecting)
-                    .sort((a, b) => {
-                        const aRect = a.boundingClientRect;
-                        const bRect = b.boundingClientRect;
-                        return aRect.top - bRect.top;
-                    });
-
-                if (visible.length > 0) {
-                    activeId = visible[0].target.id;
-                    if (pendingId === activeId) pendingId = "";
-                }
-            },
-            {
-                rootMargin: "-10% 0px -55% 0px",
-                threshold: [0, 0.25, 0.5, 0.75, 1],
-            },
-        );
-
-        sections.forEach((section) => {
-            const el = document.getElementById(section.id);
-            if (el) observer.observe(el);
-        });
+        window.addEventListener("scroll", updateActive, { passive: true });
+        updateActive();
 
         return () => {
             ro.disconnect();
             window.removeEventListener("resize", onResize);
-            observer.disconnect();
+            window.removeEventListener("scroll", updateActive);
         };
     });
 </script>
@@ -233,19 +233,31 @@
     /* ── Desktop: vertical right-aligned dock ── */
     @media (min-width: 1024px) {
         .section-nav {
-            top: auto;
+            top: 0;
             right: 0;
             left: auto;
-            bottom: 10vh;
+            bottom: 0;
             padding: 0;
             display: flex;
             align-items: center;
+            justify-content: flex-end;
+            pointer-events: none;
+            width: 2.75rem;
+        }
+
+        /* Hover the right-edge sliver to expand */
+        .section-nav::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: auto;
         }
 
         .nav-dock {
             max-width: none;
             margin: 0;
             flex-direction: column;
+            align-items: flex-end;
             gap: 0.25rem;
             padding: 0.5rem 0.5rem 0.5rem 0;
             background: color-mix(
@@ -260,14 +272,17 @@
             box-shadow:
                 0 1px 4px oklch(0% 0 0 / 0.01),
                 0 8px 24px oklch(0% 0 0 / 0.02);
-            transform: scale(0.75) translateX(calc(100% - 3.5rem));
+            transform: translateX(calc(100% - 5.8rem)) scale(0.75);
+            transform-origin: right center;
             transition:
                 transform 350ms var(--ease-default),
                 box-shadow 350ms var(--ease-default);
+            pointer-events: auto;
         }
 
-        .section-nav:hover .nav-dock {
-            transform: scale(1.05) translateX(0);
+        .section-nav:hover .nav-dock,
+        .section-nav:focus-within .nav-dock {
+            transform: translateX(0) scale(1.2);
             box-shadow:
                 0 2px 8px oklch(0% 0 0 / 0.02),
                 0 12px 32px oklch(0% 0 0 / 0.1);
@@ -282,6 +297,7 @@
             font-size: 0.6875rem;
             letter-spacing: 0.08em;
             min-width: 8rem;
+            width: 100%;
         }
 
         .nav-dock.wrap .nav-item {

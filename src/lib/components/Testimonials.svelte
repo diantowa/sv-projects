@@ -1,5 +1,6 @@
 <script lang="ts">
     import MarqueeColumn from './MarqueeColumn.svelte';
+    import { reveal } from "$lib/actions/reveal";
 
     interface Props {
         id?: string;
@@ -44,7 +45,7 @@
 
 <section {id} class="testimonials" aria-label="Testimonials">
     <div class="testimonials-inner">
-        <div class="testimonials-header">
+        <div class="testimonials-header" use:reveal={{ mode: "rise" }}>
             <span class="label">Testimonials</span>
             <h2 class="testimonials-heading">What People Say</h2>
         </div>
@@ -52,7 +53,7 @@
         {#if testimonials.length === 0}
             <p class="testimonials-empty">No testimonials yet.</p>
         {:else}
-            <div class="marquee-grid">
+            <div class="marquee-grid" use:reveal={{ mode: "rise", stagger: true, staggerInterval: 80 }}>
                 {#each columns as col, colIdx}
                     {#if col.items.length > 0}
                         <MarqueeColumn items={col.items} speed={col.speed} colIdx={colIdx} />

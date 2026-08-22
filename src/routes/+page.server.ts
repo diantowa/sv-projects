@@ -2,7 +2,6 @@ import { getDb } from '$lib/server/db';
 import {
 	testimonial,
 	project,
-	experience,
 	resume,
 	resumeExperience,
 	resumeEducation,
@@ -26,7 +25,6 @@ export const load: PageServerLoad = async ({ platform }) => {
 			testimonials: [],
 			projects: [],
 			projectCount: 0,
-			experiences: [],
 			resume: null,
 			resumeExperiences: [],
 			resumeEducation: [],
@@ -56,16 +54,6 @@ export const load: PageServerLoad = async ({ platform }) => {
 		tags: p.tags ? (() => { try { return JSON.parse(p.tags); } catch { return []; } })() : []
 	}));
 
-	const experiences = await db
-		.select()
-		.from(experience)
-		.orderBy(desc(experience.createdAt));
-
-	const experiencesParsed = experiences.map(e => ({
-		...e,
-		technologies: e.technologies ? (() => { try { return JSON.parse(e.technologies); } catch { return []; } })() : []
-	}));
-
 	// Résumé data — rendered directly inside the home page's résumé modal (no iframe).
 	const [profileRows, resumeExp, resumeEdu, resumeCert] = await Promise.all([
 		db.select().from(resume).where(eq(resume.id, 'main')),
@@ -80,7 +68,6 @@ export const load: PageServerLoad = async ({ platform }) => {
 		testimonials: testimonialsParsed,
 		projects: projectsParsed,
 		projectCount: projects.length,
-		experiences: experiencesParsed,
 		resume: profile
 			? { ...profile, skills: parse<{ category: string; items: string[] }[]>(profile.skills, []) }
 			: null,

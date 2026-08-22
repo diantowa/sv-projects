@@ -2,6 +2,11 @@
 	import type { Pathname } from '$app/types';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
+	import { onNavigate } from '$app/navigation';
+	import { onMount } from 'svelte';
+	import { prefersReducedMotion } from 'svelte/motion';
+	import Lenis from 'lenis';
+	import { setLenis } from '$lib/utils/scroll';
 	import { locales, localizeHref } from '$lib/paraglide/runtime';
 	import '$lib/styles/global.css';
 	import favicon from '$lib/assets/favicon.svg';
@@ -17,6 +22,43 @@
 	const OG_IMAGE = `${SITE_URL}/og-image.png`;
 
 	let { children } = $props();
+
+	// Smooth scrolling — Lenis (lightweight, transform-based, GPU-friendly).
+	// Manual rAF loop (more predictable than autoRaf across environments);
+	// respectReducedMotion disables smoothing for reduced-motion users.
+	let lenis: Lenis | null = null;
+	let rafId = 0;
+
+	onMount(() => {
+		lenis = new Lenis({
+			respectReducedMotion: true,
+			anchors: true,
+		});
+		setLenis(lenis);
+
+		const raf = (time: number) => {
+			lenis?.raf(time);
+			rafId = requestAnimationFrame(raf);
+		};
+		rafId = requestAnimationFrame(raf);
+
+		return () => {
+			cancelAnimationFrame(rafId);
+			lenis?.destroy();
+			lenis = null;
+			setLenis(null);
+		};
+	});
+
+	// Cross-fade client-side navigations via the View Transitions API.
+	// Skipped for reduced-motion users and while the first-load Preloader is
+	// still covering the viewport (its slide-up would be cross-faded away).
+	onNavigate(() => {
+		if (prefersReducedMotion.current) return;
+		if (document.querySelector('.preloader:not(.done)')) return;
+		const nav = document.startViewTransition?.(() => {});
+		return () => nav?.ready.finally(() => {});
+	});
 </script>
 
 <svelte:head>
@@ -84,6 +126,15 @@
 			]
 		}}
 	</script>
+
+	<!-- View Transitions — default cross-fade; themed via global.css -->
+	<style>
+		::view-transition-old(root),
+		::view-transition-new(root) {
+			animation-duration: 280ms;
+			animation-timing-function: var(--ease-motion);
+		}
+	</style>
 
 	<!-- WebSite Schema (for Google Sitelinks Search Box) -->
 	<script type="application/ld+json">

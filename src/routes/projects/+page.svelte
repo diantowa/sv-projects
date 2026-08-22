@@ -1,23 +1,25 @@
 <script lang="ts">
     import SectionNav from "$lib/components/SectionNav.svelte";
     import CTA from "$lib/components/CTA.svelte";
+    import { reveal } from "$lib/actions/reveal";
     import { sections } from "$lib/configs/navs";
-    import { projects } from "$lib/data/content";
+
+    let { data } = $props();
 </script>
 
 <SectionNav sections={sections.projects} />
 
 <section id="projects" class="page-section">
     <div class="page-inner">
-        <span class="label">Projects</span>
-        <h1 class="page-title">Selected Work</h1>
-        <p class="page-subtitle">
+        <span class="label page-label animate-in">Projects</span>
+        <h1 class="page-title animate-in-2">Selected Work</h1>
+        <p class="page-subtitle animate-in-3">
             A collection of projects spanning web applications, design systems,
             and developer tools.
         </p>
 
-        <div class="projects-list">
-            {#each projects as project (project.id)}
+        <div class="projects-list" use:reveal={{ mode: "rise", stagger: true, staggerInterval: 80 }}>
+            {#each data.projects as project (project.id)}
                 <article class="project-item" id={project.id}>
                     <div class="project-header">
                         <div>

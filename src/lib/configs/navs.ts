@@ -48,7 +48,6 @@ export const sections = {
 
   archive: [
     { id: "articles", label: "All Articles" },
-    { id: "rss", label: "RSS" },
   ] as SectionItem[],
 
   projects: [

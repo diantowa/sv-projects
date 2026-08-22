@@ -42,7 +42,7 @@
     "runtime": null
   },
   "build": {
-    "buildCommand": "cd /Users/yu/Spaces/p/sv_/sv_project\nlsof -ti tcp:4173 2>/dev/null | xargs -r kill -9 2>/dev/null; pkill -f \"wrangler dev\" 2>/dev/null; sleep 1\nbun run build 2>&1 | tail -2\n(bun run preview >/tmp/sv_prev.log 2>&1 &) ; sleep 13 ; tail -1 /tmp/sv_prev.log\ncurl -s \"http://localhost:4173/\" -o /dev/null -w \"/ HTTP %{http_code}\\n\"\necho \"DURATION in bundle : $(grep -oE '2200' .svelte-kit/cloudflare/_app/immutable/**/*.js 2>/dev/null | head -1)\"",
+    "buildCommand": "cd /Users/yu/Spaces/p/sv_/sv_project\nlsof -ti tcp:4173 2>/dev/null | xargs -r kill -9 2>/dev/null; pkill -f \"wrangler dev\" 2>/dev/null; sleep 1\nbun run build 2>&1 | tail -2\n(bun run preview >/tmp/sv_prev.log 2>&1 &) ; sleep 13 ; tail -1 /tmp/sv_prev.log\necho \"=== insert throwaway markdown post with image + heading + list ===\"\nbunx wrangler d1 execute sv_project --local --command \"INSERT INTO blog_post (id,title,excerpt,slug,date,tags,body,created_at) VALUES ('tmp-img','Img Test','test','tmp-image-test','2026-06-02','[\\\"Test\\\"]', '## Section'||char(10)||char(10)||'Para with **bold**.'||char(10)||char(10)||'![a cat](https://example.com/cat.png)'||char(10)||char(10)||'- one'||char(10)||'- two', 1717000000);\" 2>/dev/null | grep -o '\"success\": true' | head -1\necho \"=== render check ===\"\ncurl -s \"http://localhost:4173/blog/tmp-image-test\" -o /tmp/bi.html -w \"HTTP %{http_code}\\n\"\necho \"img tag    : $(grep -Foc '<img' /tmp/bi.html)\"\necho \"img src    : $(grep -Foc 'src=\\\"https://example.com/cat.png\\\"' /tmp/bi.html)\"\necho \"h2 heading : $(grep -Foc '<h2' /tmp/bi.html)\"\necho \"bold       : $(grep -Foc '<strong>bold' /tmp/bi.html)\"\necho \"list       : $(grep -Foc '<li>one' /tmp/bi.html)\"\necho \"=== cleanup throwaway ===\"\nbunx wrangler d1 execute sv_project --local --command \"DELETE FROM blog_post WHERE id='tmp-img';\" 2>/dev/null | grep -o '\"success\": true' | head -1\necho \"=== existing post still 200 ===\"\ncurl -s \"http://localhost:4173/blog/reactive-layouts-svelte-5\" -o /dev/null -w \"HTTP %{http_code}\\n\"",
     "testCommand": null,
     "lintCommand": null,
     "devCommand": "npm run dev",
@@ -187,21 +187,57 @@
   },
   "hotPaths": [
     {
+      "path": "src/lib/server/db/schema.ts",
+      "accessCount": 18,
+      "lastAccessed": 1780380982024,
+      "type": "file"
+    },
+    {
       "path": "src/lib/components/ResumeModal.svelte",
+      "accessCount": 14,
+      "lastAccessed": 1780380245411,
+      "type": "file"
+    },
+    {
+      "path": "src/routes/colabo/+page.svelte",
+      "accessCount": 14,
+      "lastAccessed": 1780381139352,
+      "type": "file"
+    },
+    {
+      "path": "src/routes/archive/+page.server.ts",
       "accessCount": 13,
-      "lastAccessed": 1780372925130,
+      "lastAccessed": 1780379537937,
+      "type": "file"
+    },
+    {
+      "path": "src/routes/colabo/+page.server.ts",
+      "accessCount": 12,
+      "lastAccessed": 1780381009253,
+      "type": "file"
+    },
+    {
+      "path": "src/routes/archive/+page.svelte",
+      "accessCount": 11,
+      "lastAccessed": 1780379456490,
       "type": "file"
     },
     {
       "path": "src/routes/+page.svelte",
-      "accessCount": 9,
-      "lastAccessed": 1780375112792,
+      "accessCount": 10,
+      "lastAccessed": 1780379446227,
       "type": "file"
     },
     {
       "path": "src/routes/+page.server.ts",
-      "accessCount": 7,
-      "lastAccessed": 1780372889141,
+      "accessCount": 9,
+      "lastAccessed": 1780379452236,
+      "type": "file"
+    },
+    {
+      "path": "drizzle/0006_resume.sql",
+      "accessCount": 8,
+      "lastAccessed": 1780379459297,
       "type": "file"
     },
     {
@@ -211,9 +247,45 @@
       "type": "file"
     },
     {
+      "path": "src/routes/projects/+page.svelte",
+      "accessCount": 7,
+      "lastAccessed": 1780379449389,
+      "type": "file"
+    },
+    {
+      "path": "drizzle.config.ts",
+      "accessCount": 7,
+      "lastAccessed": 1780379467109,
+      "type": "file"
+    },
+    {
+      "path": "src/routes/projects/+page.server.ts",
+      "accessCount": 7,
+      "lastAccessed": 1780379494693,
+      "type": "file"
+    },
+    {
       "path": "src/lib/components/ResumeSheets.svelte",
       "accessCount": 6,
       "lastAccessed": 1780372918563,
+      "type": "file"
+    },
+    {
+      "path": "drizzle/0000_bent_speedball.sql",
+      "accessCount": 6,
+      "lastAccessed": 1780379435319,
+      "type": "file"
+    },
+    {
+      "path": "drizzle/0001_lumpy_lady_mastermind.sql",
+      "accessCount": 6,
+      "lastAccessed": 1780379435555,
+      "type": "file"
+    },
+    {
+      "path": "src/routes/resume/+page.server.ts",
+      "accessCount": 6,
+      "lastAccessed": 1780379535299,
       "type": "file"
     },
     {
@@ -229,9 +301,27 @@
       "type": "file"
     },
     {
-      "path": "src/routes/resume/+page.server.ts",
+      "path": "drizzle/0002_flat_rocket_racer.sql",
       "accessCount": 5,
-      "lastAccessed": 1780372890688,
+      "lastAccessed": 1780379435927,
+      "type": "file"
+    },
+    {
+      "path": "drizzle/0003_polite_stardust.sql",
+      "accessCount": 5,
+      "lastAccessed": 1780379436123,
+      "type": "file"
+    },
+    {
+      "path": "src/routes/+layout.svelte",
+      "accessCount": 5,
+      "lastAccessed": 1780379446392,
+      "type": "file"
+    },
+    {
+      "path": "package.json",
+      "accessCount": 5,
+      "lastAccessed": 1780379466633,
       "type": "file"
     },
     {
@@ -241,9 +331,45 @@
       "type": "file"
     },
     {
-      "path": "src/routes/+layout.svelte",
+      "path": "src/routes/blog/[slug]/+page.svelte",
       "accessCount": 4,
-      "lastAccessed": 1780375462233,
+      "lastAccessed": 1780382234478,
+      "type": "file"
+    },
+    {
+      "path": "drizzle/seed_projects.sql",
+      "accessCount": 3,
+      "lastAccessed": 1780379405711,
+      "type": "file"
+    },
+    {
+      "path": "drizzle/meta/_journal.json",
+      "accessCount": 3,
+      "lastAccessed": 1780379453943,
+      "type": "file"
+    },
+    {
+      "path": "drizzle/meta/0003_snapshot.json",
+      "accessCount": 3,
+      "lastAccessed": 1780379474990,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/server/db/index.ts",
+      "accessCount": 3,
+      "lastAccessed": 1780380256473,
+      "type": "file"
+    },
+    {
+      "path": "src/routes/api/projects/+server.ts",
+      "accessCount": 3,
+      "lastAccessed": 1780380263179,
+      "type": "file"
+    },
+    {
+      "path": "src/routes/blog/[slug]/+page.server.ts",
+      "accessCount": 3,
+      "lastAccessed": 1780382195243,
       "type": "file"
     },
     {
@@ -259,21 +385,93 @@
       "type": "file"
     },
     {
-      "path": "package.json",
-      "accessCount": 1,
-      "lastAccessed": 1780375113292,
+      "path": "src/lib/data/content.ts",
+      "accessCount": 2,
+      "lastAccessed": 1780379442489,
+      "type": "file"
+    },
+    {
+      "path": "wrangler.jsonc",
+      "accessCount": 2,
+      "lastAccessed": 1780379471510,
+      "type": "file"
+    },
+    {
+      "path": "svelte.config.js",
+      "accessCount": 2,
+      "lastAccessed": 1780379477676,
       "type": "file"
     },
     {
       "path": "src/lib/styles/global.css",
-      "accessCount": 1,
-      "lastAccessed": 1780375113347,
+      "accessCount": 2,
+      "lastAccessed": 1780380260528,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/components/InquiryModal.svelte",
+      "accessCount": 2,
+      "lastAccessed": 1780381161824,
       "type": "file"
     },
     {
       "path": "src/lib/stores/theme.svelte.ts",
       "accessCount": 1,
       "lastAccessed": 1780375123899,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/components/ArchivePreview.svelte",
+      "accessCount": 1,
+      "lastAccessed": 1780379390221,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/types/index.ts",
+      "accessCount": 1,
+      "lastAccessed": 1780379400404,
+      "type": "file"
+    },
+    {
+      "path": "drizzle/seed_experiences.sql",
+      "accessCount": 1,
+      "lastAccessed": 1780379400928,
+      "type": "file"
+    },
+    {
+      "path": "drizzle/0004_nifty_spyke.sql",
+      "accessCount": 1,
+      "lastAccessed": 1780379485285,
+      "type": "file"
+    },
+    {
+      "path": "src/hooks.server.ts",
+      "accessCount": 1,
+      "lastAccessed": 1780379491866,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/components/CTA.svelte",
+      "accessCount": 1,
+      "lastAccessed": 1780380245661,
+      "type": "file"
+    },
+    {
+      "path": "src/routes/testimonials/new/+page.svelte",
+      "accessCount": 1,
+      "lastAccessed": 1780380252624,
+      "type": "file"
+    },
+    {
+      "path": "src/routes/api/testimonials/+server.ts",
+      "accessCount": 1,
+      "lastAccessed": 1780380253066,
+      "type": "file"
+    },
+    {
+      "path": "drizzle/0007_inquiry.sql",
+      "accessCount": 1,
+      "lastAccessed": 1780380991582,
       "type": "file"
     }
   ],

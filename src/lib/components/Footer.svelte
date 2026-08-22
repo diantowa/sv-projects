@@ -41,6 +41,7 @@
                                 : {}}
                         >{item.label}</a>
                     {/each}
+                    <a href="/rss.xml" target="_blank" rel="noopener">RSS</a>
                 </div>
             </div>
 

@@ -39,6 +39,43 @@ export const project = sqliteTable('project', {
 	createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date())
 });
 
+export const blogPost = sqliteTable('blog_post', {
+	id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+	title: text('title').notNull(),
+	excerpt: text('excerpt'),
+	slug: text('slug').notNull(),
+	date: text('date'),
+	tags: text('tags'), // JSON: string[]
+	body: text('body'),
+	createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date())
+});
+
+export const collaboration = sqliteTable('collaboration', {
+	id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+	name: text('name').notNull(),
+	role: text('role').notNull(),
+	description: text('description'),
+	year: text('year'),
+	link: text('link'),
+	status: text('status'),
+	published: integer('published', { mode: 'boolean' }).notNull().default(true),
+	createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date())
+});
+
+export const inquiry = sqliteTable('inquiry', {
+	id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+	name: text('name').notNull(),
+	email: text('email').notNull(),
+	company: text('company'),
+	projectType: text('project_type'),
+	budget: text('budget'),
+	timeline: text('timeline'),
+	message: text('message').notNull(),
+	link: text('link'),
+	status: text('status').notNull().default('new'),
+	createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date())
+});
+
 // ── Résumé / CV (singleton profile + managed sections, edited via ../sv_manager) ──
 export const resume = sqliteTable('resume', {
 	id: text('id').primaryKey().default('main'),

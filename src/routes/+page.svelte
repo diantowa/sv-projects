@@ -36,7 +36,7 @@
     {/snippet}
 </Intro>
 
-<ExperienceTimeline id="experience" experiences={data.experiences} />
+<ExperienceTimeline id="experience" experiences={data.resumeExperiences} />
 
 <Testimonials id="testimonials" testimonials={data.testimonials} />
 

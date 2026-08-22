@@ -1,20 +1,23 @@
 <script lang="ts">
 	import SectionNav from '$lib/components/SectionNav.svelte';
-	import CTA from '$lib/components/CTA.svelte';
-	import { sections, socialMedia } from '$lib/configs/navs';
-	import { colaborations } from '$lib/data/content';
+	import InquiryModal from '$lib/components/InquiryModal.svelte';
+	import { reveal } from '$lib/actions/reveal';
+	import { sections } from '$lib/configs/navs';
+
+	let { data } = $props();
+	let inquiryOpen = $state(false);
 </script>
 
 <SectionNav sections={sections.colabo} />
 
 <section id="collaborations" class="page-section">
 	<div class="page-inner">
-		<span class="label">Colabo</span>
-		<h1 class="page-title">Collaborations & Contact</h1>
-		<p class="page-subtitle">Partnerships, open source contributions, and community involvement.</p>
+		<span class="label animate-in">Colabo</span>
+		<h1 class="page-title animate-in-2">Collaborations & Contact</h1>
+		<p class="page-subtitle animate-in-3">Partnerships, open source contributions, and community involvement.</p>
 
-		<div class="colabo-list">
-			{#each colaborations as colabo (colabo.id)}
+		<div class="colabo-list" use:reveal={{ mode: "rise", stagger: true, staggerInterval: 70 }}>
+			{#each data.collaborations as colabo (colabo.id)}
 				<article class="colabo-item" id={colabo.id}>
 					<div class="colabo-header">
 						<div>
@@ -33,26 +36,20 @@
 	</div>
 </section>
 
-<section id="contact" class="page-section">
-	<div class="page-inner">
-		<span class="label">Contact</span>
-		<h2 class="page-title" style="font-size: var(--text-2xl);">Get in Touch</h2>
-		<p class="page-subtitle">I'm always open to new opportunities and interesting conversations.</p>
-
-		<div class="contact-grid">
-			{#each socialMedia as item}
-				<div class="contact-item">
-					<span class="label">{item.label}</span>
-					<a
-						href={item.href}
-						class="contact-link"
-						{...(item.external ? { target: '_blank', rel: 'noopener' } : {})}
-					>{item.href.replace('mailto:', '').replace('https://', '')}</a>
-				</div>
-			{/each}
-		</div>
+<section id="contact" class="page-section work">
+	<div class="page-inner cta-inner">
+		<span class="label">Get in touch</span>
+		<h2 class="page-title">Let's work together</h2>
+		<p class="page-subtitle">
+			Have a project or a partnership in mind? Send a quick brief — it takes under a minute.
+		</p>
+		<button class="cta" type="button" onclick={() => (inquiryOpen = true)}>
+			Start a project →
+		</button>
 	</div>
 </section>
+
+<InquiryModal bind:open={inquiryOpen} siteKey={data.siteKey} />
 
 <style>
 	.page-section {
@@ -162,56 +159,29 @@
 		border-color: var(--color-text);
 	}
 
-	.contact-grid {
-		display: grid;
-		grid-template-columns: 1fr;
-		gap: 0;
-		border: 1px solid var(--color-border);
+	.cta-inner {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
 	}
 
-	@media (min-width: 768px) {
-		.contact-grid {
-			grid-template-columns: repeat(2, 1fr);
-		}
+	.cta {
+		margin-top: 0.5rem;
+		padding: 0.875rem 2rem;
+		font-size: var(--text-sm);
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--color-surface);
+		background: var(--color-text);
+		border: 1px solid var(--color-text);
+		border-radius: var(--radius-sm);
+		cursor: pointer;
+		transition: all var(--duration-fast) var(--ease-default);
 	}
 
-	.contact-item {
-		padding: 1.25rem;
-		border-bottom: 1px solid var(--color-border);
-	}
-
-	.contact-item:nth-child(odd) {
-		border-right: 1px solid var(--color-border);
-	}
-
-	@media (min-width: 768px) {
-		.contact-item:nth-child(odd) {
-			border-right: none;
-		}
-		.contact-item:nth-child(1),
-		.contact-item:nth-child(2) {
-			border-bottom: 1px solid var(--color-border);
-		}
-		.contact-item:nth-child(3),
-		.contact-item:nth-child(4) {
-			border-bottom: none;
-		}
-	}
-
-	.contact-item .label {
-		display: block;
-		margin-bottom: 0.5rem;
-	}
-
-	.contact-link {
-		font-size: var(--text-base);
+	.cta:hover {
+		background: transparent;
 		color: var(--color-text);
-		border-bottom: 1px solid var(--color-border);
-		padding-bottom: 1px;
-		transition: border-color var(--duration-fast) var(--ease-default);
-	}
-
-	.contact-link:hover {
-		border-color: var(--color-text);
 	}
 </style>
