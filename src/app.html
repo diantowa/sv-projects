@@ -11,14 +11,12 @@
 
 		<meta name="text-scale" content="scale" />
 
-		<!-- Preloader guard: hide the intro overlay pre-paint for returning
-		     visitors (once per session) and reduced-motion users. -->
+		<!-- Preloader guard: reduced-motion users skip the overlay pre-paint,
+		     so entrance animations start immediately and nothing flashes. -->
 		<script>
 			(function () {
 				try {
-					var seen = sessionStorage.getItem('kaiyu:preloaded');
-					var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-					if (seen || reduce)
+					if (window.matchMedia('(prefers-reduced-motion: reduce)').matches)
 						document.documentElement.setAttribute('data-preloaded', '');
 				} catch (e) {}
 			})();

@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { formatExperienceDateRange } from "$lib/dates";
     interface Skill {
         category: string;
         items: string[];
@@ -6,6 +7,7 @@
     interface Exp {
         title: string;
         company: string;
+        employmentType?: string | null;
         location?: string | null;
         startDate: string;
         endDate: string;
@@ -96,12 +98,12 @@
                 {#each experiences as e (e.company + e.title + e.startDate)}
                     <div class="entry">
                         <p class="entry-title">
-                            <strong>{e.company}</strong>
+                            <strong>{e.company}</strong>{#if e.employmentType} <span class="entry-type">({e.employmentType})</span>{/if}
                             <span class="sep">/</span>
                             {e.title}
                         </p>
                         <p class="entry-meta">
-                            {e.startDate} — {e.endDate}{#if e.location} ·
+                            {formatExperienceDateRange(e.startDate, e.endDate)}{#if e.location} ·
                                 {e.location}{/if}
                         </p>
                         {#each e.bullets as b, i (i)}
@@ -237,6 +239,13 @@
     .entry-title strong {
         color: #111;
         font-weight: 700;
+    }
+    .entry-title .entry-type {
+        font-size: 8pt;
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #888;
     }
     .entry-title .sep {
         color: #c4c4c4;

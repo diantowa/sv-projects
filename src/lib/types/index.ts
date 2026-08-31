@@ -47,3 +47,16 @@ export interface Colabo {
 	year: string;
 	link?: string;
 }
+
+/**
+ * Minimal shape the FilterableMasonry component needs from any item
+ * (BlogPost, Project, ...). Extras are carried through to the card slot.
+ * No index signature so concrete interfaces (BlogPost/Project) satisfy it
+ * structurally.
+ */
+export type FilterableItem = {
+	id: string;
+	title: string;
+	description?: string;
+	tags: string[];
+};

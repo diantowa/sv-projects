@@ -14,7 +14,8 @@
 	"workers_dev": true,
 	"preview_urls": true,
 	"routes": [
-		{ "pattern": "kaiyu.dev/*", "zone_name": "kaiyu.dev" }
+		{ "pattern": "kaiyu.dev", "custom_domain": true },
+		{ "pattern": "kakyu.dev", "custom_domain": true }
 	],
 	"d1_databases": [
 		{

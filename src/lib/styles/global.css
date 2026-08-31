@@ -360,18 +360,66 @@ a {
     animation-play-state: running;
 }
 
-/* Above-fold entrances (hero + page headers): run once on load. */
+/* instantWhenVisible: elements already inside the first viewport at mount
+   (short pages — e.g. the footer on a blog post) skip the entrance motion;
+   the rise is reserved for scroll arrival, so nothing plays unseen. */
+.rise-el.instant,
+.reveal-stagger.instant > .rise-el {
+    animation: none;
+}
+.reveal.instant,
+.reveal-stagger.instant > * {
+    opacity: 1;
+    transform: none;
+    transition: none;
+}
+
+/* Above-fold entrances (hero + page headers): IO-gated — each reveals only
+   when it enters the viewport (see reveal-animate-ins in +layout.svelte),
+   instead of firing all at once on mount. Paused until `.running` is
+   added; reduced-motion forces them running below. */
 .animate-in {
     animation: rise-in 800ms var(--ease-motion) both;
     animation-delay: 150ms;
+    animation-play-state: paused;
 }
 .animate-in-2 {
     animation: rise-in 800ms var(--ease-motion) both;
     animation-delay: 280ms;
+    animation-play-state: paused;
 }
 .animate-in-3 {
     animation: rise-in 800ms var(--ease-motion) both;
     animation-delay: 410ms;
+    animation-play-state: paused;
+}
+.animate-in.running,
+.animate-in-2.running,
+.animate-in-3.running {
+    animation-play-state: running;
+}
+
+/* While the first-load preloader covers the viewport, hold all entrances at
+   their hidden/initial state so they don't play behind it. Released when the
+   loader starts to lift (`data-preloader-lifting`) or is fully gone
+   (`data-preloaded` — also set for returning/reduced-motion visitors), so
+   every entrance animates in as the page is revealed. Works for both the
+   keyframe entrances (`.animate-in*`, `.rise-el`) and the transition reveals
+   (`.reveal`, `.reveal-stagger > *`). */
+html:not([data-preloader-lifting]):not([data-preloaded]) .reveal,
+html:not([data-preloader-lifting]):not([data-preloaded]) .reveal-stagger > *,
+html:not([data-preloader-lifting]):not([data-preloaded]) .rise-el,
+html:not([data-preloader-lifting]):not([data-preloaded]) .animate-in,
+html:not([data-preloader-lifting]):not([data-preloaded]) .animate-in-2,
+html:not([data-preloader-lifting]):not([data-preloaded]) .animate-in-3 {
+    opacity: 0 !important;
+    transform: translateY(24px) !important;
+}
+html:not([data-preloader-lifting]):not([data-preloaded]) .rise-el,
+html:not([data-preloader-lifting]):not([data-preloaded]) .animate-in,
+html:not([data-preloader-lifting]):not([data-preloaded]) .animate-in-2,
+html:not([data-preloader-lifting]):not([data-preloaded]) .animate-in-3 {
+    animation-play-state: paused !important;
 }
 
 /* ── Archive: masonry feed (JS shortest-column placement, Pinterest-style) ──
@@ -465,6 +513,18 @@ html.lenis body {
         transform: none !important;
     }
     .rise-el {
+        animation-duration: 0.01ms !important;
+        animation-delay: 0ms !important;
+        animation-play-state: running !important;
+    }
+    /* Masonry cards gain `.running` only on viewport entry (IO-gated); under
+       reduced motion show every card regardless of scroll position. */
+    .arch-card.rise-in {
+        animation: none !important;
+    }
+    .animate-in,
+    .animate-in-2,
+    .animate-in-3 {
         animation-duration: 0.01ms !important;
         animation-delay: 0ms !important;
         animation-play-state: running !important;

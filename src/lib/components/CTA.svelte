@@ -188,8 +188,8 @@
     }
 
     /* ── Original fly-to-center motion (uiverse "smart-moth", site colors).
-       Icon + context text glide together to the button center on hover;
-       the rest label slides out. ── */
+       At rest: icon + label are a normal flex row (tight gap). On hover the
+       icon+text group becomes absolutely centered; label slides out. ── */
     .cta-button {
         position: relative;
     }
@@ -197,11 +197,7 @@
     .cta-button .svg-wrapper-1 {
         display: flex;
         align-items: center;
-        gap: 0.25em;
-        position: absolute;
-        left: 0.9em;
-        top: 50%;
-        transform: translateY(-50%);
+        position: relative;
         transition:
             left 0.3s ease-in-out,
             transform 0.3s ease-in-out;
@@ -244,12 +240,15 @@
         text-transform: none;
         letter-spacing: 0.02em;
         opacity: 0;
+        position: absolute;
+        left: calc(100% + 0.5em);
+        white-space: nowrap;
         transition: opacity 0.25s ease-in-out;
     }
 
     .cta-button .cta-button-label {
         display: block;
-        margin-left: 1.6em;
+        margin-left: 0.5em;
         transition:
             transform 0.3s ease-in-out,
             opacity 0.25s ease-in-out;
@@ -260,8 +259,7 @@
     }
 
     .cta-button:hover .svg-wrapper-1 {
-        left: 50%;
-        transform: translate(-50%, -50%) scale(1.15);
+        transform: scale(1.15);
     }
 
     .cta-button:hover svg {

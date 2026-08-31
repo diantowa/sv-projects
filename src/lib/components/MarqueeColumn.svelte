@@ -1,5 +1,6 @@
 <script lang="ts">
     import { onMount } from 'svelte';
+    import { untrack } from 'svelte';
     import { getPlatformIcon } from '$lib/utils/social';
 
     interface Props {
@@ -68,8 +69,9 @@
         };
     });
 
-    // Duplicate items for seamless loop
-    const duplicated = [...items, ...items];
+    // Duplicate items for seamless loop. untrack() marks the read-once
+    // capture as intentional (items is static for the component's life).
+    const duplicated = untrack(() => [...items, ...items]);
 </script>
 
 <div class="marquee-col">

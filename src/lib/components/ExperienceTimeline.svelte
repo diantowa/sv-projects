@@ -1,10 +1,12 @@
 <script lang="ts">
     import { reveal } from "$lib/actions/reveal";
+    import { formatExperienceDateRange } from "$lib/dates";
 
     interface ResumeExperience {
         id: string;
         title: string;
         company: string;
+        employmentType?: string | null;
         location?: string | null;
         startDate: string;
         endDate: string;
@@ -131,11 +133,11 @@
                         <div class="timeline-header">
                             <h3 class="timeline-role">{exp.title}</h3>
                             <span class="timeline-date"
-                                >{exp.startDate} — {exp.endDate}</span
+                                >{formatExperienceDateRange(exp.startDate, exp.endDate, exp.employmentType)}</span
                             >
                         </div>
                         <p class="timeline-company">
-                            {exp.company}{#if exp.location} · {exp.location}{/if}
+                            <span class="company-name">{exp.company}</span>{#if exp.location} · <span class="timeline-location">{exp.location}</span>{/if}
                         </p>
                         <div class="timeline-desc-wrap">
                             <div class="timeline-desc-inner">
@@ -238,7 +240,7 @@
             transform 500ms var(--ease-motion) 120ms,
             opacity 400ms var(--ease-motion) 120ms;
     }
-    .timeline-item.revealed .timeline-dot {
+    .timeline-item:global(.revealed) .timeline-dot {
         transform: scale(1);
         opacity: 1;
     }
@@ -255,7 +257,7 @@
             transform 650ms var(--ease-motion) 200ms,
             opacity 400ms var(--ease-motion) 200ms;
     }
-    .timeline-item.revealed .timeline-line {
+    .timeline-item:global(.revealed) .timeline-line {
         transform: scaleY(1);
         opacity: 1;
     }

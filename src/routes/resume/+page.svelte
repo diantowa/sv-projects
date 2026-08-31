@@ -1,5 +1,6 @@
 <script lang="ts">
     import ResumeSheets from "$lib/components/ResumeSheets.svelte";
+    import { reveal } from "$lib/actions/reveal";
     import { page } from "$app/state";
     import { onMount } from "svelte";
 
@@ -48,7 +49,7 @@
     {/if}
 </svelte:head>
 
-<div class="resume-screen" class:bare>
+<div class="resume-screen" class:bare use:reveal={bare ? null : { mode: "rise" }}>
     <ResumeSheets
         resume={data.resume}
         experiences={data.experiences}

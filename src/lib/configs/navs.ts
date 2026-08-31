@@ -19,7 +19,7 @@ export const mainNav: NavLink[] = [
 ];
 
 /* ── Contact config — edit WHATSAPP_NUMBER to your number (intl format, no +) ── */
-export const WHATSAPP_NUMBER = '6281234567890';
+export const WHATSAPP_NUMBER = '6289687407837';
 
 /* ── Social links (Footer) ── */
 export const socialMedia: NavLink[] = [
@@ -34,7 +34,7 @@ export const socialMedia: NavLink[] = [
     external: true,
   },
   { label: "Twitter", href: "https://twitter.com/foohyu_", external: true },
-  { label: "Email", href: "mailto:wahyudichrisdianto@gmail.com" },
+  { label: "Email", href: "mailto:wahyu@kakyu.dev" },
 ];
 
 /* ── Section navigation per page ── */
@@ -46,17 +46,8 @@ export const sections = {
     { id: "contact", label: "Contact", wrap: "Chat" },
   ] as SectionItem[],
 
-  archive: [
-    { id: "articles", label: "All Articles" },
-  ] as SectionItem[],
-
   projects: [
     { id: "projects", label: "All Projects" },
-    { id: "contact", label: "Contact" },
-  ] as SectionItem[],
-
-  colabo: [
-    { id: "collaborations", label: "Collaborations" },
     { id: "contact", label: "Contact" },
   ] as SectionItem[],
 };

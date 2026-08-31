@@ -3,39 +3,39 @@ import type { Experience, BlogPost, Project, Colabo } from '$lib/types';
 export const experiences: Experience[] = [
 	{
 		id: 'exp-1',
-		role: 'Senior Frontend Engineer',
-		company: 'TechCorp Inc.',
-		startDate: '2023-01',
+		role: 'Web Developer',
+		company: 'Nomads Giving Back!',
+		startDate: '2026-04',
 		endDate: 'Present',
-		description: 'Leading the frontend architecture migration to Svelte 5. Improved performance metrics by 40% through component optimization and code splitting strategies.',
-		technologies: ['Svelte', 'TypeScript', 'TailwindCSS']
+		description: 'Developed and maintained web and mobile application features using React Native and React.js, collaborating remotely with cross-functional distributed teams.',
+		technologies: ['React Native', 'React', 'TypeScript', 'TailwindCSS']
 	},
 	{
 		id: 'exp-2',
-		role: 'Full Stack Developer',
-		company: 'Digital Studio',
-		startDate: '2021-06',
-		endDate: '2022-12',
-		description: 'Built and maintained client-facing web applications with modern JavaScript frameworks. Collaborated with design teams to implement pixel-perfect interfaces.',
-		technologies: ['React', 'Node.js', 'PostgreSQL']
+		role: 'Backend Officer',
+		company: 'DPPAPP Pusdatin DKI Jakarta',
+		startDate: '2026-02',
+		endDate: 'Present',
+		description: 'Engineered high-performance microservices on Kubernetes and Kong, holding p99 latency under 500ms for Jakarta provincial-scale family data integration.',
+		technologies: ['Java', 'Spring Boot', 'Go', 'Node.js', 'Kubernetes', 'CrateDB']
 	},
 	{
 		id: 'exp-3',
-		role: 'Junior Developer',
-		company: 'StartupXYZ',
-		startDate: '2020-03',
-		endDate: '2021-05',
-		description: 'Developed responsive web applications and contributed to the company\'s design system. Implemented automated testing pipelines.',
-		technologies: ['Vue.js', 'Python', 'Docker']
+		role: 'Software Developer',
+		company: 'PT Softorb Technology Indonesia',
+		startDate: '2025-11',
+		endDate: '2026-01',
+		description: 'Built and maintained enterprise systems for LRT Jakarta 1B and the Telkomsel Perso App in large-scale production using .NET (C#) and Next.js.',
+		technologies: ['C#', '.NET Framework', 'Next.js', 'TypeScript', 'PostgreSQL', 'Docker']
 	},
 	{
 		id: 'exp-4',
-		role: 'Web Development Intern',
-		company: 'Agency Co.',
-		startDate: '2019-09',
-		endDate: '2020-02',
-		description: 'Assisted in building client websites and learned production-level development workflows.',
-		technologies: ['HTML', 'CSS', 'JavaScript']
+		role: 'Software Engineer',
+		company: 'PT. Lugu Software Indonesia',
+		startDate: '2025-01',
+		endDate: '2025-10',
+		description: 'Developed and maintained multiple client products under Lugu Software. Led development of lambeturah.com using Laravel 12 + Inertia React and built lugu.id.',
+		technologies: ['Laravel', 'Inertia.js', 'React', 'MySQL', 'Docker', 'CI/CD']
 	}
 ];
 

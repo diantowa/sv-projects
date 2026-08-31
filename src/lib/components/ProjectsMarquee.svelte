@@ -120,12 +120,14 @@
         return () => {
             cancelAnimationFrame(rafId);
             ro.disconnect();
-            rowEl.removeEventListener("pointerdown", onPointerDown);
-            rowEl.removeEventListener("pointermove", onPointerMove);
-            rowEl.removeEventListener("pointerup", onPointerUp);
-            rowEl.removeEventListener("pointercancel", onPointerUp);
-            rowEl.removeEventListener("mouseenter", onMouseEnter);
-            rowEl.removeEventListener("mouseleave", onMouseLeave);
+            if (rowEl) {
+                rowEl.removeEventListener("pointerdown", onPointerDown);
+                rowEl.removeEventListener("pointermove", onPointerMove);
+                rowEl.removeEventListener("pointerup", onPointerUp);
+                rowEl.removeEventListener("pointercancel", onPointerUp);
+                rowEl.removeEventListener("mouseenter", onMouseEnter);
+                rowEl.removeEventListener("mouseleave", onMouseLeave);
+            }
         };
     });
 

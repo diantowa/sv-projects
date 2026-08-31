@@ -3,7 +3,7 @@ import { blogPost } from '$lib/server/db/schema';
 import { desc } from 'drizzle-orm';
 import { marked } from 'marked';
 
-const SITE_URL = 'https://kaiyu.dev';
+const SITE_URL = 'https://kakyu.dev';
 
 const escapeXml = (s: string) =>
 	s

@@ -12,12 +12,9 @@
         let raf = 0;
         let hideTimer: ReturnType<typeof setTimeout>;
 
-        // Once per session, and never for reduced-motion users.
-        const skip =
-            !!sessionStorage.getItem("kaiyu:preloaded") ||
-            window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-        if (skip) {
+        // Never for reduced-motion users — the app.html guard pre-paints the
+        // released state so entrances start without any loader flash.
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
             pct = 100;
             fill = 1;
             done = true;
@@ -34,8 +31,10 @@
             if (progress < 1) {
                 raf = requestAnimationFrame(tick);
             } else {
-                sessionStorage.setItem("kaiyu:preloaded", "1");
                 done = true;
+                // Signal that the loader is about to lift so entrance animations
+                // can start as the page is revealed (instead of behind the loader).
+                document.documentElement.setAttribute("data-preloader-lifting", "");
                 // After the slide-up transition, drop it from the layer entirely.
                 hideTimer = setTimeout(
                     () =>

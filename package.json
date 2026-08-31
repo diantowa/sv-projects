@@ -11,6 +11,7 @@
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "wrangler types --check && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"smoke:webview": "bun scripts/webview-smoke.ts",
 		"gen": "wrangler types",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate:local": "for f in drizzle/000*.sql; do echo \"Applying $f...\"; wrangler d1 execute sv_project --local --file=\"$f\"; done",
@@ -36,6 +37,7 @@
 		"tailwindcss": "^4.2.2",
 		"typescript": "^6.0.2",
 		"vite": "^8.0.7",
+		"webview-bun": "^2.4.0",
 		"wrangler": "^4.81.0"
 	},
 	"dependencies": {

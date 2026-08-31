@@ -26,7 +26,7 @@ export const load: PageServerLoad = async ({ platform }) => {
 
 	const [profileRows, experiences, education, certifications] = await Promise.all([
 		db.select().from(resume).where(eq(resume.id, 'main')),
-		db.select().from(resumeExperience).orderBy(asc(resumeExperience.sort)),
+		db.select().from(resumeExperience).where(eq(resumeExperience.published, true)).orderBy(asc(resumeExperience.sort)),
 		db.select().from(resumeEducation).orderBy(asc(resumeEducation.sort)),
 		db.select().from(resumeCertification).orderBy(asc(resumeCertification.sort))
 	]);

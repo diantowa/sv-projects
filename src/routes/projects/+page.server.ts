@@ -13,7 +13,12 @@ export const load: PageServerLoad = async ({ platform }) => {
 
 	return {
 		projects: rows.map((p) => ({
-			...p,
+			id: p.id,
+			title: p.title,
+			description: p.description,
+			year: p.year,
+			link: p.link ?? undefined,
+			image: p.image ?? undefined,
 			tags: p.tags ? (() => { try { return JSON.parse(p.tags); } catch { return []; } })() : []
 		}))
 	};

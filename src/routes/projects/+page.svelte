@@ -1,10 +1,13 @@
 <script lang="ts">
     import SectionNav from "$lib/components/SectionNav.svelte";
+    import FilterableMasonry from "$lib/components/FilterableMasonry.svelte";
     import CTA from "$lib/components/CTA.svelte";
     import { reveal } from "$lib/actions/reveal";
     import { sections } from "$lib/configs/navs";
+    import type { Project } from "$lib/types";
 
     let { data } = $props();
+    const projects = $derived(data.projects as Project[]);
 </script>
 
 <SectionNav sections={sections.projects} />
@@ -18,31 +21,37 @@
             and developer tools.
         </p>
 
-        <div class="projects-list" use:reveal={{ mode: "rise", stagger: true, staggerInterval: 80 }}>
-            {#each data.projects as project (project.id)}
-                <article class="project-item" id={project.id}>
-                    <div class="project-header">
-                        <div>
-                            <h2 class="project-title">{project.title}</h2>
-                            <p class="project-desc">{project.description}</p>
-                        </div>
-                        <span class="project-year">{project.year}</span>
+        <FilterableMasonry
+            items={projects}
+            searchPlaceholder="Search projects…"
+            noun="project"
+            collapseMaxHeight={700}
+            seeMoreLabel="See more projects"
+        >
+            {#snippet card(item)}
+                {@const project = item as Project}
+                {#if project.image}
+                    <img class="proj-image" src={project.image} alt={project.title} loading="lazy" />
+                {/if}
+                <div class="proj-body">
+                    <div class="proj-meta">
+                        <span class="proj-year">{project.year}</span>
                     </div>
-                    <div class="project-footer">
-                        <div class="project-tags">
-                            {#each project.tags as tag}
-                                <span class="tag">{tag}</span>
-                            {/each}
-                        </div>
-                        {#if project.link}
-                            <a href={project.link} class="project-link"
-                                >View project →</a
-                            >
-                        {/if}
+                    <h2 class="proj-title">{project.title}</h2>
+                    <p class="proj-desc">{project.description}</p>
+                    <div class="proj-tags">
+                        {#each project.tags as tag (tag)}
+                            <span class="tag">{tag}</span>
+                        {/each}
                     </div>
-                </article>
-            {/each}
-        </div>
+                    {#if project.link}
+                        <a href={project.link} class="proj-link" target="_blank" rel="noopener"
+                            >View project →</a
+                        >
+                    {/if}
+                </div>
+            {/snippet}
+        </FilterableMasonry>
     </div>
 </section>
 
@@ -51,8 +60,7 @@
         label="Collaboration"
         headline="Have a project in mind?"
         description="I'm always interested in new challenges and opportunities to build something meaningful."
-        buttonText="Let's Talk"
-        buttonLink="/colabo"
+        buttons={[{ label: "Let's Talk", href: "/colabo" }]}
     />
 </section>
 
@@ -62,7 +70,7 @@
     }
 
     .page-inner {
-        max-width: 860px;
+        max-width: 1100px;
         margin: 0 auto;
         padding: 0 1.5rem;
     }
@@ -92,61 +100,48 @@
         margin-bottom: var(--space-block);
     }
 
-    .projects-list {
+    /* ── Card content (rendered inside the shared .arch-card shell) ── */
+    .proj-image {
+        width: 100%;
+        aspect-ratio: 16 / 10;
+        object-fit: cover;
+        display: block;
+    }
+
+    .proj-body {
         display: flex;
         flex-direction: column;
+        gap: 0.625rem;
+        padding: 1.25rem;
+        flex: 1;
     }
 
-    .project-item {
-        padding: var(--space-element) 0;
-        border-top: 1px solid var(--color-border);
-    }
-
-    .project-item:last-child {
-        border-bottom: 1px solid var(--color-border);
-    }
-
-    .project-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 2rem;
-        margin-bottom: 1rem;
-    }
-
-    .project-title {
-        font-size: var(--text-xl);
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-    }
-
-    .project-desc {
-        font-size: var(--text-sm);
-        color: var(--color-text-muted);
-        line-height: 1.6;
-        max-width: 56ch;
-    }
-
-    .project-year {
+    .proj-meta .proj-year {
         font-size: var(--text-xs);
         font-weight: 600;
         letter-spacing: 0.05em;
+        text-transform: uppercase;
         color: var(--color-text-muted);
-        white-space: nowrap;
     }
 
-    .project-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 1rem;
-        flex-wrap: wrap;
+    .proj-title {
+        font-size: var(--text-lg);
+        font-weight: 600;
+        line-height: 1.3;
+        letter-spacing: -0.01em;
     }
 
-    .project-tags {
+    .proj-desc {
+        font-size: var(--text-sm);
+        color: var(--color-text-muted);
+        line-height: 1.6;
+    }
+
+    .proj-tags {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.5rem;
+        gap: 0.375rem;
+        margin-top: auto;
     }
 
     .tag {
@@ -158,17 +153,24 @@
         border-radius: var(--radius-sm);
     }
 
-    .project-link {
+    .proj-link {
         font-size: var(--text-sm);
         font-weight: 600;
         letter-spacing: 0.03em;
-        color: var(--color-text);
-        border-bottom: 1px solid var(--color-border);
+        color: var(--color-accent);
+        border-bottom: 1px solid var(--color-accent-border);
         padding-bottom: 1px;
+        width: fit-content;
         transition: border-color var(--duration-fast) var(--ease-default);
     }
 
-    .project-link:hover {
-        border-color: var(--color-text);
+    .proj-link:hover {
+        border-color: var(--color-accent);
+    }
+
+    @media (max-width: 640px) {
+        .proj-body {
+            padding: 1rem;
+        }
     }
 </style>

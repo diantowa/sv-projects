@@ -2,10 +2,14 @@
 	import type { Pathname } from '$app/types';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import { onNavigate } from '$app/navigation';
+	import { onNavigate, afterNavigate } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { prefersReducedMotion } from 'svelte/motion';
-	import Lenis from 'lenis';
+	// Type-only import — Lenis is loaded lazily in onMount so the server bundle
+	// never statically imports it (a bare `import "lenis"` in SSR is dropped by
+	// esbuild because lenis declares sideEffects:false, which triggers a
+	// wrangler ignored-bare-import warning on deploy).
+	import type Lenis from 'lenis';
 	import { setLenis } from '$lib/utils/scroll';
 	import { locales, localizeHref } from '$lib/paraglide/runtime';
 	import '$lib/styles/global.css';
@@ -14,7 +18,7 @@
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 
-	const SITE_URL = 'https://kaiyu.dev';
+	const SITE_URL = 'https://kakyu.dev';
 	const SITE_NAME = 'Wahyudi Chrisdianto';
 	const SITE_TITLE = 'Wahyudi Chrisdianto — Full Stack Developer';
 	const SITE_DESCRIPTION =
@@ -23,6 +27,42 @@
 
 	let { children } = $props();
 
+	// ── IO-gate `.animate-in*` entrances (hero + page headers). Previously
+	//    these fired on mount, so every entrance played at once even before it
+	//    was on screen. Now each is revealed only when it enters the viewport
+	//    (or immediately if already above the fold). Mirrors the `reveal`
+	//    action's intersect + above-fold fallback.
+	let animateInsObs: IntersectionObserver | null = null;
+	const seenAnimateIns = new WeakSet<HTMLElement>();
+
+	function revealAnimateIns() {
+		if (!animateInsObs) {
+			animateInsObs = new IntersectionObserver(
+				(entries) => {
+					for (const entry of entries) {
+						if (entry.isIntersecting) {
+							entry.target.classList.add('running');
+							animateInsObs?.unobserve(entry.target);
+						}
+					}
+				},
+				{ threshold: 0.15, rootMargin: '0px 0px -8% 0px' },
+			);
+		}
+
+		for (const el of document.querySelectorAll<HTMLElement>('.animate-in, .animate-in-2, .animate-in-3')) {
+			if (seenAnimateIns.has(el)) continue;
+			seenAnimateIns.add(el);
+			// Above the fold, or scrolled-past on a restored page: reveal now so
+			// it's never left hidden. Otherwise wait for the observer.
+			if (el.getBoundingClientRect().top < window.innerHeight * 0.9) {
+				el.classList.add('running');
+			} else {
+				animateInsObs.observe(el);
+			}
+		}
+	}
+
 	// Smooth scrolling — Lenis (lightweight, transform-based, GPU-friendly).
 	// Manual rAF loop (more predictable than autoRaf across environments);
 	// respectReducedMotion disables smoothing for reduced-motion users.
@@ -30,19 +70,28 @@
 	let rafId = 0;
 
 	onMount(() => {
-		lenis = new Lenis({
-			respectReducedMotion: true,
-			anchors: true,
-		});
-		setLenis(lenis);
+		revealAnimateIns();
+		let unmounted = false;
 
-		const raf = (time: number) => {
-			lenis?.raf(time);
+		(async () => {
+			const { default: Lenis } = await import('lenis');
+			if (unmounted) return;
+			lenis = new Lenis({
+				respectReducedMotion: true,
+				anchors: true,
+			});
+			setLenis(lenis);
+
+			const raf = (time: number) => {
+				if (unmounted) return;
+				lenis?.raf(time);
+				rafId = requestAnimationFrame(raf);
+			};
 			rafId = requestAnimationFrame(raf);
-		};
-		rafId = requestAnimationFrame(raf);
+		})();
 
 		return () => {
+			unmounted = true;
 			cancelAnimationFrame(rafId);
 			lenis?.destroy();
 			lenis = null;
@@ -50,14 +99,24 @@
 		};
 	});
 
+	// Re-run on every client-side navigation so newly-rendered `.animate-in*`
+	// elements are observed too (deduped via seenAnimateIns).
+	afterNavigate(() => revealAnimateIns());
+
 	// Cross-fade client-side navigations via the View Transitions API.
 	// Skipped for reduced-motion users and while the first-load Preloader is
 	// still covering the viewport (its slide-up would be cross-faded away).
-	onNavigate(() => {
+	onNavigate((navigation) => {
 		if (prefersReducedMotion.current) return;
 		if (document.querySelector('.preloader:not(.done)')) return;
-		const nav = document.startViewTransition?.(() => {});
-		return () => nav?.ready.finally(() => {});
+		if (!document.startViewTransition) return;
+
+		return new Promise((resolve) => {
+			document.startViewTransition(async () => {
+				resolve();
+				await navigation.complete;
+			});
+		});
 	});
 </script>
 

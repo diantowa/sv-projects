@@ -1,5 +1,6 @@
 <script lang="ts">
     import ThemeSwitcher from "$lib/components/ThemeSwitcher.svelte";
+    import { reveal } from "$lib/actions/reveal";
     import { mainNav, socialMedia, WHATSAPP_NUMBER } from "$lib/configs/navs";
 
     const currentYear = new Date().getFullYear();
@@ -13,7 +14,7 @@
     <span class="footer-watermark" aria-hidden="true">Wahyudi Chrisdianto</span>
 
     <div class="footer-inner grid-container">
-        <div class="footer-grid">
+        <div class="footer-grid" use:reveal={{ mode: "rise", stagger: true, staggerInterval: 60, instantWhenVisible: true }}>
             <!-- Navigation -->
             <div class="footer-col">
                 <span class="label">Navigation</span>
@@ -169,7 +170,7 @@
     }
 
     .wa-btn:active {
-        transform: translateY(0);
+        transform: translateY(0) scale(0.97);
     }
 
     .wa-icon {
@@ -204,9 +205,7 @@
         position: absolute;
         bottom: 0.2em;
         left: 50%;
-        transition:
-            transform 400ms cubic-bezier(0.4, 0, 0.2, 1),
-            font-size 400ms cubic-bezier(0.4, 0, 0.2, 1);
+        transition: transform 400ms var(--ease-default);
         transform: translateX(-30%);
         font-size: clamp(8rem, 16vw, 18rem);
         opacity: 0.4;

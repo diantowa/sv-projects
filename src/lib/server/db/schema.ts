@@ -1,4 +1,4 @@
-import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 export const task = sqliteTable('task', {
 	id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
@@ -62,19 +62,26 @@ export const collaboration = sqliteTable('collaboration', {
 	createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date())
 });
 
-export const inquiry = sqliteTable('inquiry', {
-	id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-	name: text('name').notNull(),
-	email: text('email').notNull(),
-	company: text('company'),
-	projectType: text('project_type'),
-	budget: text('budget'),
-	timeline: text('timeline'),
-	message: text('message').notNull(),
-	link: text('link'),
-	status: text('status').notNull().default('new'),
-	createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date())
-});
+export const inquiry = sqliteTable(
+	'inquiry',
+	{
+		id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+		name: text('name').notNull(),
+		email: text('email'),
+		company: text('company'),
+		projectType: text('project_type'),
+		budget: text('budget'),
+		timeline: text('timeline'),
+		message: text('message').notNull(),
+		link: text('link'),
+		contactType: text('contact_type'),
+		contactValue: text('contact_value'),
+		source: text('source').notNull().default('private_note'),
+		status: text('status').notNull().default('new'),
+		createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date())
+	},
+	(t) => [index('inquiry_created_at_idx').on(t.createdAt)]
+);
 
 // ── Résumé / CV (singleton profile + managed sections, edited via ../sv_manager) ──
 export const resume = sqliteTable('resume', {
@@ -99,11 +106,13 @@ export const resumeExperience = sqliteTable('resume_experience', {
 	id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
 	title: text('title').notNull(),
 	company: text('company').notNull(),
+	employmentType: text('employment_type'),
 	location: text('location'),
 	startDate: text('start_date').notNull(),
 	endDate: text('end_date').notNull().default('Present'),
 	bullets: text('bullets'), // JSON: string[]
 	techStack: text('tech_stack'),
+	published: integer('published', { mode: 'boolean' }).notNull().default(true),
 	sort: integer('sort').notNull().default(0)
 });
 

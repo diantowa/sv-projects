@@ -10,4 +10,18 @@ const handleParaglide: Handle = ({ event, resolve }) => paraglideMiddleware(even
 	});
 });
 
-export const handle: Handle = handleParaglide;
+export const handle: Handle = (input) => {
+	if (input.event.url.hostname === 'kaiyu.dev') {
+		const canonicalUrl = new URL(input.event.url);
+		canonicalUrl.protocol = 'https:';
+		canonicalUrl.hostname = 'kakyu.dev';
+		canonicalUrl.port = '';
+
+		return new Response(null, {
+			status: 308,
+			headers: { location: canonicalUrl.toString() }
+		});
+	}
+
+	return handleParaglide(input);
+};

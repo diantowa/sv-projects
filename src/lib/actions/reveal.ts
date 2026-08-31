@@ -19,6 +19,13 @@ interface RevealOptions {
      * language as the hero entrance (fade + rise, --ease-motion).
      */
     mode?: "transition" | "rise";
+    /**
+     * Only animate on scroll arrival. If the element is already within the
+     * first viewport at mount (short pages — e.g. the footer on a blog post),
+     * it appears instantly instead of playing its entrance unseen right as
+     * the preloader lifts. Below-fold content still rises when scrolled to.
+     */
+    instantWhenVisible?: boolean;
 }
 
 /**
@@ -31,10 +38,14 @@ interface RevealOptions {
  * are `.rise-el` and un-pause when the parent (`.reveal-stagger`) gains
  * `.revealed`.
  */
-export const reveal: Action<HTMLElement, RevealOptions | undefined> = (
+export const reveal: Action<HTMLElement, RevealOptions | null | undefined> = (
     node,
     options = {},
 ) => {
+    // null opts the action out entirely (embed/print contexts) — no classes,
+    // no observer, no motion.
+    if (options === null) return {};
+
     const {
         threshold = 0.15,
         delay = 0,
@@ -43,6 +54,7 @@ export const reveal: Action<HTMLElement, RevealOptions | undefined> = (
         immediate = false,
         mode = "transition",
         duration,
+        instantWhenVisible = false,
     } = options;
 
     if (mode === "rise") {
@@ -77,15 +89,32 @@ export const reveal: Action<HTMLElement, RevealOptions | undefined> = (
         }
     }
 
+    // instantWhenVisible: content already inside the first viewport at mount
+    // (short pages) would play its entrance unseen while the preloader lifts.
+    // Measure synchronously — SSR layout is final at action setup (the
+    // preloader is an overlay, and scroll restoration happens pre-paint), so
+    // this is race-free. `.instant` makes the element appear without motion;
+    // below-fold content keeps the scroll-arrival entrance.
+    const wasVisibleAtMount =
+        instantWhenVisible &&
+        node.getBoundingClientRect().top < window.innerHeight;
+
     let revealed = false;
-    const observer = new IntersectionObserver(
+    let observer: IntersectionObserver | null = null;
+
+    const revealNode = () => {
+        if (revealed) return;
+        revealed = true;
+        node.classList.add("revealed");
+        if (wasVisibleAtMount) node.classList.add("instant");
+        observer?.disconnect();
+        observer = null;
+    };
+
+    observer = new IntersectionObserver(
         (entries) => {
             for (const entry of entries) {
-                if (entry.isIntersecting && !revealed) {
-                    revealed = true;
-                    node.classList.add("revealed");
-                    observer.disconnect();
-                }
+                if (entry.isIntersecting) revealNode();
             }
         },
         { threshold, rootMargin: "0px 0px -8% 0px" },
@@ -100,11 +129,7 @@ export const reveal: Action<HTMLElement, RevealOptions | undefined> = (
     const revealIfAbove = () => {
         if (revealed) return;
         const rect = node.getBoundingClientRect();
-        if (rect.top < window.innerHeight * 0.9) {
-            revealed = true;
-            node.classList.add("revealed");
-            observer.disconnect();
-        }
+        if (rect.top < window.innerHeight * 0.9) revealNode();
     };
     // Defer so layout (preloader/restored scroll) settles before measuring.
     requestAnimationFrame(revealIfAbove);
@@ -112,7 +137,8 @@ export const reveal: Action<HTMLElement, RevealOptions | undefined> = (
 
     return {
         destroy() {
-            observer.disconnect();
+            observer?.disconnect();
+            observer = null;
             window.removeEventListener("scroll", revealIfAbove);
             if (mode === "rise") {
                 if (stagger) {
