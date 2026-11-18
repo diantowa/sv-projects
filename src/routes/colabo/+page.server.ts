@@ -17,7 +17,12 @@ const str = (value: FormDataEntryValue | null) =>
 const isContactType = (value: string): value is ContactType =>
 	(CONTACT_TYPES as readonly string[]).includes(value);
 
+// The inquiry form stays closed until Turnstile is fully configured (site key + secret).
+const inquiryReady = (env: App.Platform['env'] | undefined) =>
+	Boolean(env?.TURNSTILE_SITE_KEY && env?.TURNSTILE_SECRET);
+
 export const load: PageServerLoad = async ({ platform }) => ({
+	inquiryOpen: inquiryReady(platform?.env),
 	siteKey: platform?.env?.TURNSTILE_SITE_KEY ?? ''
 });
 
@@ -58,30 +63,32 @@ export const actions: Actions = {
 			return fail(400, { error: 'Enter a valid email address.' });
 		}
 
+		// Fail closed: without Turnstile the form must not write to the inbox.
 		const secret = platform?.env?.TURNSTILE_SECRET;
-		if (secret) {
-			const token = str(form.get('cf-turnstile-response'));
-			if (!token) return fail(400, { error: 'Please complete the verification.' });
+		if (!inquiryReady(platform?.env) || !secret) {
+			return fail(503, { error: 'Messages are closed for now. Book a call or email hi@diantowa.com.' });
+		}
+		const token = str(form.get('cf-turnstile-response'));
+		if (!token) return fail(400, { error: 'Please complete the verification.' });
 
-			try {
-				const body = new FormData();
-				body.append('secret', secret);
-				body.append('response', token);
-				const ip = request.headers.get('CF-Connecting-IP');
-				if (ip) body.append('remoteip', ip);
+		try {
+			const body = new FormData();
+			body.append('secret', secret);
+			body.append('response', token);
+			const ip = request.headers.get('CF-Connecting-IP');
+			if (ip) body.append('remoteip', ip);
 
-				const verify = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-					method: 'POST',
-					body
-				});
-				const outcome = (await verify.json()) as { success?: boolean };
-				if (!outcome.success) {
-					return fail(400, { error: 'Verification failed. Please try again.' });
-				}
-			} catch (error) {
-				console.error('Turnstile verification failed', error);
-				return fail(503, { error: 'Verification is temporarily unavailable.' });
+			const verify = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+				method: 'POST',
+				body
+			});
+			const outcome = (await verify.json()) as { success?: boolean };
+			if (!outcome.success) {
+				return fail(400, { error: 'Verification failed. Please try again.' });
 			}
+		} catch (error) {
+			console.error('Turnstile verification failed', error);
+			return fail(503, { error: 'Verification is temporarily unavailable.' });
 		}
 
 		if (!platform?.env?.DB) {

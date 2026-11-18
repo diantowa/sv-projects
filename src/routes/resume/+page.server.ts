@@ -25,7 +25,21 @@ export const load: PageServerLoad = async ({ platform }) => {
 	const db = getDb(platform.env.DB);
 
 	const [profileRows, experiences, education, certifications] = await Promise.all([
-		db.select().from(resume).where(eq(resume.id, 'main')),
+		db
+			.select({
+				// Public page: explicit columns only. email and phone are never sent to the client.
+				fullName: resume.fullName,
+				headline: resume.headline,
+				location: resume.location,
+				website: resume.website,
+				linkedin: resume.linkedin,
+				summary: resume.summary,
+				skills: resume.skills,
+				includeProjects: resume.includeProjects,
+				includeCollaborations: resume.includeCollaborations
+			})
+			.from(resume)
+			.where(eq(resume.id, 'main')),
 		db.select().from(resumeExperience).where(eq(resumeExperience.published, true)).orderBy(asc(resumeExperience.sort)),
 		db.select().from(resumeEducation).orderBy(asc(resumeEducation.sort)),
 		db.select().from(resumeCertification).orderBy(asc(resumeCertification.sort))

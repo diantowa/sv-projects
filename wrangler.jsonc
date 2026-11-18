@@ -11,12 +11,9 @@
 		"binding": "ASSETS",
 		"directory": ".svelte-kit/cloudflare"
 	},
-	"workers_dev": true,
-	"preview_urls": true,
-	"routes": [
-		{ "pattern": "kaiyu.dev", "custom_domain": true },
-		{ "pattern": "kakyu.dev", "custom_domain": true }
-	],
+	"workers_dev": false,
+	"preview_urls": false,
+	// Custom domains removed: attach a domain only after a security review (see SECURITY note in PR).
 	"d1_databases": [
 		{
 			"binding": "DB",

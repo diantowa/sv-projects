@@ -15,6 +15,9 @@
 	let { data } = $props();
 	const formId = 'colabo-composer';
 	const publicEmail = 'wahyu@kakyu.dev';
+	// Shown while the inquiry form is closed (Turnstile not configured yet).
+	const BOOKING_URL = 'https://cal.com/diantowa/discovery-call';
+	const FALLBACK_EMAIL = 'hi@diantowa.com';
 	let formElement = $state<HTMLFormElement | null>(null);
 	let identityInput = $state<HTMLInputElement | null>(null);
 	let companyInput = $state<HTMLInputElement | null>(null);
@@ -140,6 +143,19 @@
 		<h1 class="page-title animate-in-2">Collaborations & Contact</h1>
 		<p class="page-subtitle animate-in-3">Have a thought, a project, or simply a hello? Start with the essentials.</p>
 
+		{#if !data.inquiryOpen}
+			<div class="composer closed-note">
+				<p>Messages through this page are paused for now. Reach me directly instead:</p>
+				<ul>
+					<li>
+						<a href={BOOKING_URL} target="_blank" rel="noopener noreferrer">
+							Book a Discovery Call<span class="visually-hidden"> (opens in a new tab)</span>
+						</a>
+					</li>
+					<li><a href={`mailto:${FALLBACK_EMAIL}`}>{FALLBACK_EMAIL}</a></li>
+				</ul>
+			</div>
+		{:else}
 		<form id={formId} class="composer" bind:this={formElement} method="POST" action="/colabo?/inquire"
 			use:enhance={() => {
 				submitting = true; serverError = '';
@@ -194,6 +210,7 @@
 				{anchorRight} {anchorTop} triggerElement={sendButton}
 				onWhatsApp={continueWhatsApp} onEmail={continueEmail} onReset={sendAnother} />
 		</form>
+		{/if}
 	</div>
 </section>
 
@@ -214,6 +231,16 @@
 		padding-top: clamp(2rem, 5vw, 3.5rem); border-top: 1px solid var(--color-border);
 	}
 	.composer-field { display: grid; gap: 0.72rem; }
+	.closed-note { gap: 1rem; }
+	.closed-note p { margin: 0; color: var(--color-text-muted); line-height: 1.6; }
+	.closed-note ul { display: grid; gap: 0.6rem; margin: 0; padding: 0; list-style: none; }
+	.closed-note a {
+		display: inline-flex; min-height: 44px; align-items: center;
+		color: var(--color-text); font-size: clamp(1.05rem, 2.3vw, 1.3rem); text-underline-offset: 0.25em;
+	}
+	.visually-hidden {
+		position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+	}
 	.composer-field > span {
 		font-size: 0.68rem; font-weight: 650; letter-spacing: 0.12em;
 		text-transform: uppercase; color: var(--color-text-muted);
